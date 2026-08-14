@@ -1,0 +1,75 @@
+<html>
+	<head>hello</head>
+
+	<body>
+		<div>
+			<form action="{{ url_for('gettrain') }}" method="POST">
+				<div>
+					<label for="fromloc">From Location</label>
+					<input
+						type="text"
+						class="form-control"
+						id="fromloc"
+						name="fromloc"
+						placeholder="Enter from location here"
+						required>
+					<label for="fromtime">From Time</label>
+					<input
+						type="text"
+						class="form-control"
+						id="fromtime"
+						name="fromtime"
+						placeholder="enter from time here"
+						required>
+					<label for="fromdate">From Date</label>
+					<input
+						type="text"
+						class="form-control"
+						id="fromdate"
+						name="fromdate"
+						placeholder="enter from date here"
+						required>
+				</div>	
+				<div>
+					<label for="toloc">To Location</label>
+					<input
+						type="text"
+						class="form-control"
+						id="toloc"
+						name="toloc"
+						placeholder="Enter to location here"
+						required>
+					<label for="totime">To time</label>
+					<input
+						type="text"
+						class="form-control"
+						id="totime"
+						name="totime"
+						placeholder="enter to time here"
+						required>
+					<label for="todate">To date</label>
+					<input
+						type="text"
+						class="form-control"
+						id="todate"
+						name="todate"
+						placeholder="enter to date here"
+						required>
+				</div>
+				<div>
+					<label for="days">Days</label>
+					<input
+						type="text"
+						class="form-control"
+						id="days"
+						name="days"
+						placeholder="enter number of days">
+				</div>
+		</div>
+				<button type="submit">
+					Yes!
+				</button>
+			</form>
+		</div>
+	</body>
+</html>
