@@ -8,6 +8,7 @@ import station
 import service
 import arrivals
 
+
 from dotenv import load_dotenv
 
 from markupsafe import escape
@@ -21,6 +22,8 @@ db_user = os.getenv("POSTGRES_USER")
 db_name = os.getenv("POSTGRES_DB")
 db_pass = os.getenv("POSTGRES_PASSWORD")
 
+apikey = os.getenv("API_KEY")
+
 print(f"DB_HOST: {db_host}")
 
 conn = db.get_connection(
@@ -31,45 +34,88 @@ conn = db.get_connection(
     db_name
 )
 
-# @app.route("/")
-# def index():
-#     return render_template("index.html")
-
-# @app.route("/gettrain", methods=["POST"])
-
-lds = station.get_station_id(conn, "lds")
-bdi = station.get_station_id(conn, "bdi")
-
-if lds is None:
-    lds = station.add_station(conn, "lds")
-
-if bdi is None:
-    bdi = station.add_station(conn, "bdi")
+import requests
 
 
-service_id = service.get_service(conn, lds, bdi)
+def get_train_data(fromloc, fromtime, fromdate,
+                   toloc, totime, todate, days):
 
-if service_id is None:
-    print("adding service")
-    service_id = service.add_service(conn, lds, bdi)
+    #url = "https://hsp-prod.rockshore.net/api/v1/serviceMetrics"
+    url = "https://api1.raildata.org.uk/1010-historical-service-performance-_hsp_v1/api/v1/serviceMetrics"
+
+    query = {
+        "from_loc": fromloc,
+        "to_loc": toloc,
+        "from_time": fromtime,
+        "to_time": totime,
+        "from_date": fromdate,
+        "to_date": todate,
+        "days": days
+    }
+
+    headers = {
+        "x-apikey": apikey,
+        "User-Agent": "curl/8.21.0"
+    }
+
+    payload = {
+        "from_loc": fromloc,
+        "to_loc": toloc,
+        "from_time": fromtime,
+        "to_time": totime,
+        "from_date": fromdate,
+        "to_date": todate,
+        "days": days,
+    }
+
+    response = requests.post(
+        url,
+        headers=headers,
+        json=payload
+    )
+
+    return response.json()
+
+     
+@app.route("/")
+def index():
+     return render_template("index.html")
+
+@app.route("/gettrain", methods=["POST"])
+def gettrain():
 
 
-run_id = service.add_service_run(
-    conn,
-    service_id,
-    "rid",
-    "2026-08-10"
-)
+    fromloc = request.form.get("fromloc")
+    fromtime = request.form.get("fromtime")
+    fromdate = request.form.get("fromdate")
 
-print(f"Service ID: {service_id}")
-print(f"Run ID: {run_id}")
+    toloc = request.form.get("toloc")
+    totime = request.form.get("totime")
+    todate = request.form.get("todate")
 
+    days = request.form.get("days")
 
-arrivals.add_arrival(
-    conn,
-    run_id,
-    lds,
-    "2026-08-10 09:22:00",
-    "2026-08-10 09:22:00",
-    0
-)
+    data = get_train_data(
+        fromloc,
+        fromtime,
+        fromdate,
+        toloc,
+        totime,
+        todate,
+        days
+    )
+    
+    #print(data)
+
+    station.add_stations(conn, data)
+    service.add_services(conn, data)
+
+    return(data)
+
+@app.route("/resetdb")
+def resetdb():
+    print("resetdb")
+
+@app.route("/graphs")
+def graphs():
+    print("graphs")

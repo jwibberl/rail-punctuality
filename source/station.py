@@ -33,3 +33,16 @@ def add_station(conn, name):
             conn.commit()
     except Exception as e:
         print(f"error adding station {e}")
+
+def add_stations(conn, data):
+    for service in data["Services"]:
+        attributes = service["serviceAttributesMetrics"]
+
+        origin = attributes["origin_location"]
+        destination = attributes["destination_location"]
+
+        if get_station_id(conn, origin) is None:
+            add_station(conn, origin)
+
+        if get_station_id(conn, destination) is None:
+            add_station(conn, destination)
