@@ -7,6 +7,7 @@ import db
 import station
 import service
 import arrivals
+import graph
 
 
 from dotenv import load_dotenv
@@ -36,22 +37,10 @@ conn = db.get_connection(
 
 import requests
 
-
 def get_train_data(fromloc, fromtime, fromdate,
                    toloc, totime, todate, days):
 
-    #url = "https://hsp-prod.rockshore.net/api/v1/serviceMetrics"
     url = "https://api1.raildata.org.uk/1010-historical-service-performance-_hsp_v1/api/v1/serviceMetrics"
-
-    query = {
-        "from_loc": fromloc,
-        "to_loc": toloc,
-        "from_time": fromtime,
-        "to_time": totime,
-        "from_date": fromdate,
-        "to_date": todate,
-        "days": days
-    }
 
     headers = {
         "x-apikey": apikey,
@@ -66,6 +55,7 @@ def get_train_data(fromloc, fromtime, fromdate,
         "from_date": fromdate,
         "to_date": todate,
         "days": days,
+        "tolerance": ["1", "2", "5"]
     }
 
     response = requests.post(
@@ -75,8 +65,7 @@ def get_train_data(fromloc, fromtime, fromdate,
     )
 
     return response.json()
-
-     
+   
 @app.route("/")
 def index():
      return render_template("index.html")
@@ -104,18 +93,31 @@ def gettrain():
         todate,
         days
     )
-    
-    #print(data)
+
+    print("********************")
+    print(data)
+    print("********************")
 
     station.add_stations(conn, data)
     service.add_services(conn, data)
+    service.add_service_runs(conn, data)
+    arrivals.add_arrivals(conn, data, apikey)
 
-    return(data)
+    #return(data)
+    return render_template("index.html")
 
-@app.route("/resetdb")
+@app.route("/resetdb", methods=["POST"])
 def resetdb():
     print("resetdb")
+    db.reset_db(conn)
+    return render_template("index.html")
 
 @app.route("/graphs")
 def graphs():
-    print("graphs")
+    print("****")
+    print("rendering graphs")
+    print("****")
+
+    #Render the actual graphs
+    graph.render_graph(conn)
+    return render_template("index.html")
