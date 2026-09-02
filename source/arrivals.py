@@ -2,7 +2,7 @@ import requests
 import time
 from datetime import datetime
 
-
+#adds a specific arrival to the DB
 def add_arrival(conn, run_id, station_id, scheduled_time, actual_time, delay_minutes):
     try:
         with conn.cursor() as cur:
@@ -22,7 +22,7 @@ def add_arrival(conn, run_id, station_id, scheduled_time, actual_time, delay_min
         print(f"error adding arrival {e}")
         conn.rollback()
 
-
+#get the details of the specified service
 def get_service_details(rid, apikey):
     url = "https://api1.raildata.org.uk/1010-historical-service-performance-_hsp_v1/api/v1/serviceDetails"
 
@@ -43,7 +43,7 @@ def get_service_details(rid, apikey):
 
     return response.json()
 
-
+#This function goes through all the data passed to it and adds each arrival
 def add_arrivals(conn, data, apikey):
     try:
         for service in data["Services"]:
@@ -52,6 +52,7 @@ def add_arrivals(conn, data, apikey):
 
             for rid in rids:
 
+                #get the details of the service
                 details = get_service_details(rid, apikey)
 
                 print(f"Processing RID: {rid}")
@@ -73,6 +74,7 @@ def add_arrivals(conn, data, apikey):
 
                     result = cur.fetchone()
 
+                #if there was no data returned
                 if result is None:
                     print(f"No service run found for RID {rid}")
                     continue
@@ -140,6 +142,7 @@ def add_arrivals(conn, data, apikey):
                         actual_timestamp - scheduled_timestamp
                     ).total_seconds() / 60
 
+                    #add the arrival
                     add_arrival(
                         conn,
                         run_id,
@@ -149,6 +152,7 @@ def add_arrivals(conn, data, apikey):
                         delay_minutes
                     )
 
+    #generic exception handling
     except Exception as e:
         print(f"error adding arrivals {e}")
         conn.rollback()

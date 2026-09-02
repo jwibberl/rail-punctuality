@@ -1,6 +1,6 @@
 import db
 
-
+#This function generates the graph that will be in Grafana
 def render_graph(conn):
 
     try:
@@ -43,6 +43,7 @@ def render_graph(conn):
                     f"<5 min = {under_5}"
                 )
 
+    #generic exception handling
     except Exception as e:
         print(f"error rendering graph {e}")
         raise

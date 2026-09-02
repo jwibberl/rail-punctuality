@@ -2,6 +2,7 @@ import db
 import station
 from datetime import datetime
 
+#gets the details of a specific service. Requires station IDs of from and to stations
 def get_service(conn, from_station, to_station):
 
     with conn.cursor() as cur:      
@@ -22,6 +23,7 @@ def get_service(conn, from_station, to_station):
         else:
             return None
 
+#adds a specific service, requires db conn, from and to station IDs
 def add_service(conn, from_station, to_station):
     try:
         with conn.cursor() as cur:
@@ -39,11 +41,13 @@ def add_service(conn, from_station, to_station):
         conn.commit()
         return service_id
 
+    #generic exception handling
     except Exception as e:
         print(f"error adding service {e}")
         conn.rollback()
         return None
-            
+
+#adds a service run, this needs db conn, service id, RID and service date. The service run is an instance of a service running on the route            
 def add_service_run(conn, service_id, rid, service_date):
     try:
         with conn.cursor() as cur:
@@ -63,11 +67,13 @@ def add_service_run(conn, service_id, rid, service_date):
         conn.commit()
         return run_id
 
+    #generic exception handling
     except Exception as e:
         print(f"error adding service run {e}")
         conn.rollback()
         return None
 
+#This takes the db conn and data, and adds each service
 def add_services(conn, data):
     try:
         with conn.cursor() as cur:
@@ -90,10 +96,12 @@ def add_services(conn, data):
 
         conn.commit()
 
+    #if the service already exists, or any other exception occurs, roll back and raise an exception
     except Exception:
         conn.rollback()
         raise
 
+#takes db conn and data, adds each service run
 def add_service_runs(conn, data):
     try:
         with conn.cursor() as cur:
@@ -142,6 +150,7 @@ def add_service_runs(conn, data):
 
         conn.commit()
 
+    #if the service run alreeady exists or any other error/exception occurs, roll back and raise an exception
     except Exception:
         conn.rollback()
         raise

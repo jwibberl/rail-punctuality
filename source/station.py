@@ -1,5 +1,6 @@
 import db
 
+#return the station ID of a station, takes the db conn and the name of a station, this will be the three letter code
 def get_station_id(conn, station_name):
     cursor = conn.cursor()
 
@@ -21,6 +22,7 @@ def get_station_id(conn, station_name):
 
     return None
 
+#adds a station, takes db conn and 3 letter code for the station
 def add_station(conn, name):
     try:
         with conn.cursor() as cur:
@@ -34,6 +36,7 @@ def add_station(conn, name):
     except Exception as e:
         print(f"error adding station {e}")
 
+#loops through the data and adds all stations if they don't exist
 def add_stations(conn, data):
     for service in data["Services"]:
         attributes = service["serviceAttributesMetrics"]
